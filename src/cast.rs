@@ -777,7 +777,8 @@ impl_from_primitive_nonzero!(NonZeroU64, to_u64);
 impl_from_primitive_nonzero!(NonZeroU128, to_u128);
 
 macro_rules! impl_to_primitive_wrapping {
-    ($( fn $method:ident -> $i:ident ; )*) => {$(
+    ($( $(#[$cfg:meta])* fn $method:ident -> $i:ident ; )*) => {$(
+        $(#[$cfg])*
         #[inline]
         fn $method(&self) -> Option<$i> {
             (self.0).$method()
@@ -811,7 +812,8 @@ impl<T: ToPrimitive> ToPrimitive for Wrapping<T> {
 }
 
 macro_rules! impl_from_primitive_wrapping {
-    ($( fn $method:ident ( $i:ident ); )*) => {$(
+    ($( $(#[$cfg:meta])* fn $method:ident ( $i:ident ); )*) => {$(
+        $(#[$cfg])*
         #[inline]
         fn $method(n: $i) -> Option<Self> {
             T::$method(n).map(Wrapping)
@@ -972,7 +974,13 @@ where
 }
 
 macro_rules! impl_as_primitive {
-    (@ $T: ty =>  impl $U: ty ) => {
+    (@ $T: ty => $(#[$cfg:meta])* impl $U: ty ) => {
+        $(#[$cfg])*
+        impl AsPrimitive<$U> for $T {
+            #[inline] fn as_(self) -> $U { self as $U }
+        }
+    };
+    (@ $T: ty => impl $U: ty ) => {
         impl AsPrimitive<$U> for $T {
             #[inline] fn as_(self) -> $U { self as $U }
         }
